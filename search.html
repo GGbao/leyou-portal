@@ -162,20 +162,24 @@
                 <div class="sui-navbar">
                     <div class="navbar-inner filter">
                         <ul class="sui-nav">
-                            <li class="active">
+                            <li :class="{active:!search.sortBy}" @click="search.sortBy=''">
                                 <a href="#">综合</a>
                             </li>
                             <li>
                                 <a href="#">销量</a>
                             </li>
-                            <li>
+                            <li  @click="search.sortBy='createTime'" :class="{active: search.sortBy==='createTime'}">
                                 <a href="#">新品</a>
                             </li>
                             <li>
                                 <a href="#">评价</a>
                             </li>
-                            <li>
-                                <a href="#">价格</a>
+                            <li @click="search.sortBy='price'; search.descending = !search.descending"
+                                :class="{active: search.sortBy==='price'}">
+                                <a href="#">价格
+                                    <v-icon v-show="search.descending">arrow_drop_down</v-icon>
+                                    <v-icon v-show="!search.descending">arrow_drop_up</v-icon>
+                                </a>
                             </li>
                         </ul>
                         <div class="top-pagination">
@@ -188,6 +192,7 @@
                         </div>
                     </div>
                 </div>
+                <!--搜索结果展示-->
                 <div class="goods-list">/
                     <ul class="yui3-g">
                         <li class="yui3-u-1-5" v-for="goods in goodsList" :key="goods.id">
@@ -237,7 +242,7 @@
                                 <a href="#" @click.prevent="prePage">«上一页</a>
                             </li>
                             <li :class="{active:index(i)===search.page}" v-for="i in Math.min(5,totalPage)" :key="i">
-                                <a href="#" v-text="index(i)"></a>
+                                <a href="#" @click="search.page=index(i)" v-text="index(i)"></a>
                             </li>
                             <li class="dotted" v-show="search.page+2<totalPage&&totalPage>5"><span>...</span></li>
                             <li :class="{next:true, disabled: search.page === totalPage}">
@@ -346,7 +351,7 @@
         data: {
             ly,
             search: {},
-            goodsList: [],
+            goodsList: [], //接受搜索到的结果
             total: 0,
             totalPage: 0,
             selectedSku: {},
@@ -354,11 +359,15 @@
             showMore:false,//是否显示更多
         },
         created() {
-            //获取请求参数
+            //获取请求参数,并转为对象
             const search = ly.parse(location.search.substring(1));
-            search.page = search.page ? parseInt(search.page) : 1;//初始化分页
+            search.page = search.page ? parseInt(search.page) : 1;//初始化分页，以防为空
             search.filter = search.filter ? search.filter : {};//初始化过滤
+            //对排序进行初始化，默认为“”，代表不排序
+            search.sortBy = search.sortBy || "";
             this.search = search;
+            //对排序方式初始化，转为布尔值
+            search.descending = search.descending === "true" || false;
             //发送后台
             this.loadData();
 
@@ -386,7 +395,6 @@
                     this.totalPage = resp.data.totalPage;
 
                     //保存当前页商品
-
                     resp.data.items.forEach(goods => {
                         //把json处理成JS对象
                         goods.skus = JSON.parse(goods.skus);
