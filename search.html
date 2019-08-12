@@ -106,8 +106,9 @@
                 <!--面包屑-->
                 <ul class="fl sui-breadcrumb">
                     <li><span>全部结果:</span></li>
-                    <li><a href="#">手机</a></li>
-                    <li><span>手机通讯</span></li>
+                    <li v-for="(c,i) in breads" :key="i">
+                        <a href="#" v-if="i<2">{{c.name}}</a>
+                    <span v-else>{{c.name}}</span>
                 </ul>
                 <!--已选择过滤项-->
                 <ul class="tags-choose">
@@ -174,7 +175,7 @@
                             <li>
                                 <a href="#">评价</a>
                             </li>
-                            <li @click="search.sortBy='price'; search.descending = !search.descending"
+                            <li @click="search.sortBy='price';search.descending = (!search.descending)"
                                 :class="{active: search.sortBy==='price'}">
                                 <a href="#">价格
                                     <v-icon v-show="search.descending">arrow_drop_down</v-icon>
@@ -357,6 +358,7 @@
             selectedSku: {},
             filters:[],//过滤项
             showMore:false,//是否显示更多
+            breads:{},
         },
         created() {
             //获取请求参数,并转为对象
@@ -365,9 +367,9 @@
             search.filter = search.filter ? search.filter : {};//初始化过滤
             //对排序进行初始化，默认为“”，代表不排序
             search.sortBy = search.sortBy || "";
-            this.search = search;
             //对排序方式初始化，转为布尔值
             search.descending = search.descending === "true" || false;
+            this.search = search;
             //发送后台
             this.loadData();
 
@@ -403,6 +405,12 @@
                     })
                     this.goodsList = resp.data.items;
                     //2过滤项
+                    //初始化商品分类过滤参数
+                    if (resp.data.categories.length === 1) {
+                        //如果只有一个，那么就查询三级商品分类，展示到面包屑
+                        ly.http.get("/item/category/all/level?id="+resp.data.categories[0].id)
+                            .then(resp=>this.breads=resp.data)
+                    }
                     //2.1商品分类
                     this.filters.push({
                         k:"cid3",
@@ -479,7 +487,7 @@
                 //获取已选择的项的key
                 const keys = Object.keys(this.search.filter);
                 //完成对已选择的过滤项的过滤
-                return this.filters.filter(f => !keys.includes(f.k) && f.options.length > 1);
+                return this.filters.filter(f => !keys.includes(f.k) && f.options.length >1);
             }
 
         },
