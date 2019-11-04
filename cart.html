@@ -289,11 +289,47 @@
         methods:{
             loadCarts() {
                 //1.先判断登录状态
-                ly.verifyUser().then(res => {
-                    //判断本地未登录购物车是否存在
+                ly.verifyUser().then(() => {
+                    /*//判断本地未登录购物车是否存在
+                    //1.1获取本地的购物车
+                    const localcarts = ly.store.get("carts");
                     //如果存在，查询出购物车
-                    //发到后台，添加到redis，删除本地购物车
-                    //TODO 合并购物车，注意是集合
+                    if (localcarts!==null) {
+                        console.log(localcarts);
+                        localcarts.forEach(cart=>{
+                            console.log(cart);
+                            leyou.http.post("/cart", {
+                                skuId: cart.id,
+                                title: cart.title,
+                                image: cart.images[0],
+                                price: cart.price,
+                                num: cart.num,
+                                ownSpec: JSON.stringify(cart.ownSpec)
+                            }).then()
+                            console.log(cart);
+                        });
+                        ly.store.del("carts");
+                        console.log("已删除")
+                    }
+                    //发到后台，添加到redis，删除本地购物车*/
+                    //  合并购物车，注意是集合
+                    /*const localcarts = ly.store.get("carts");
+                    console.log(localcarts);
+                    if (localcarts && localcarts.length > 0) {
+                        localcarts.forEach(s => {
+                            s.ownSpec = JSON.stringify(s.ownSpec);
+                        });
+                        console.log("查询本地");
+                        leyou.http.post("/cart/lists",localcarts).then(
+                            //删除本地购物车
+                            ly.store.del("carts")
+                            //查询已登录购物车
+
+                        ).catch(() => {
+
+                        })
+                    }
+                    console.log("已删除");*/
                     //2.已经登录
                     leyou.http.get("/cart/list").then(({data}) => {
                         this.carts = data;
@@ -306,13 +342,13 @@
 
                     }).catch(() => {
                         console.log("查询失败")
-                    })
+                    });
 
                 }).catch(() => {
                     //3.未登陆
                     this.carts = ly.store.get("carts") || [];
                     this.carts.forEach(s => {
-                        // s.ownSpec = JSON.parse(s.ownSpec);
+                        s.ownSpec = JSON.parse(s.ownSpec);
 
                     });
                     this.selected = this.carts;
