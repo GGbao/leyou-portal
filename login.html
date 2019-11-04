@@ -109,9 +109,27 @@
         },
         methods:{
             login(){
-                leyou.http.post("/user/login",leyou.stringify(this.form))
+                leyou.http.post("/auth/login",leyou.stringify(this.form))
                     .then(resp => {
-                        if(resp.status === 200){
+                        if(resp.status === 204){
+                            //1登陆成功
+                            const localcarts = ly.store.get("carts");
+                            console.log(localcarts);
+                            if (localcarts && localcarts.length > 0) {
+                                localcarts.forEach(s => {
+                                    s.ownSpec = JSON.stringify(s.ownSpec);
+                                });
+                                console.log("查询本地");
+                                leyou.http.post("/cart/lists",localcarts).then(
+                                    //删除本地购物车
+                                    ly.store.del("carts")
+                                    //查询已登录购物车
+
+                                ).catch(() => {
+
+                                })
+                            }
+                            console.log("已删除");
                             const url = leyou.getUrlParam("returnUrl");
                             window.location = url || 'http://www.leyou.com';
                         }
