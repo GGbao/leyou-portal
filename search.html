@@ -194,7 +194,7 @@
                     </div>
                 </div>
                 <!--搜索结果展示-->
-                <div class="goods-list">/
+                <div class="goods-list">
                     <ul class="yui3-g">
                         <li class="yui3-u-1-5" v-for="goods in goodsList" :key="goods.id">
                             <div class="list-wrap">
@@ -380,10 +380,12 @@
               deep:true,
               handler(val,oldVal) {
                   // this.loadData();
+                  // 如果旧的search值为空，或者search中的key为空，证明是第一次
                   if (!oldVal || !oldVal.key) {
                       return;
                   }
                   //把请求参数写到url中
+                  // 把search对象变成请求参数，拼接在url路径
                   location.search = "?" + ly.stringify(this.search);
               }
           }

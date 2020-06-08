@@ -111,7 +111,7 @@
             login(){
                 leyou.http.post("/auth/login",leyou.stringify(this.form))
                     .then(resp => {
-                        if(resp.status === 204){
+                        if(resp.status === 204) {
                             //1登陆成功
                             const localcarts = ly.store.get("carts");
                             console.log(localcarts);
@@ -120,7 +120,7 @@
                                     s.ownSpec = JSON.stringify(s.ownSpec);
                                 });
                                 console.log("查询本地");
-                                leyou.http.post("/cart/lists",localcarts).then(
+                                leyou.http.post("/cart/lists", localcarts).then(
                                     //删除本地购物车
                                     ly.store.del("carts")
                                     //查询已登录购物车
@@ -130,8 +130,15 @@
                                 })
                             }
                             console.log("已删除");
-                            const url = leyou.getUrlParam("returnUrl");
-                            window.location = url || 'http://www.leyou.com';
+                            // const url = leyou.getUrlParam("returnUrl");
+                            var url = location.search; //获取url中"?"符之后 的字串
+                            console.log(url);
+                            if (url.indexOf("?") != -1) {
+                                var hh = url.substr(11);//截取
+                                console.log(hh);
+                            }
+
+                            window.location = hh || 'http://www.leyou.com';
                         }
                     })
                     .catch(() => this.msg = '用户名或密码错误')
